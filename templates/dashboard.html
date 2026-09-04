@@ -1,1 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SHAPPNO VPS — Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root{--ac:#ef4444;--ac-dim:#ef444488;--ac-lite:#ef444411;}
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{background:#06010a;color:#e5e7eb;font-family:'JetBrains Mono',monospace;min-height:100vh}
+    header{background:#0a0008;border-bottom:1px solid var(--ac-dim);padding:13px 20px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;transition:border-color .1s linear;flex-wrap:wrap;gap:10px}
+    .logo{display:flex;align-items:center;gap:9px}
+    .logo-mark{width:30px;height:30px;border-radius:8px;border:2px solid var(--ac);display:flex;align-items:center;justify-content:center;font-weight:800;color:var(--ac);font-size:14px;box-shadow:0 0 10px var(--ac-lite);transition:all .1s linear}
+    .logo-name{color:var(--ac);font-weight:800;font-size:15px;letter-spacing:2px;text-shadow:0 0 8px var(--ac);transition:color .1s linear}
+    .header-stats{display:flex;gap:16px;font-size:11px;color:var(--ac-dim);transition:color .1s linear}
+    .header-right{display:flex;align-items:center;gap:8px}
+    .username{color:var(--ac);font-size:12px;opacity:.85;transition:color .1s linear}
+    .btn{padding:6px 13px;border-radius:7px;font-family:inherit;font-size:11px;cursor:pointer;border:1px solid;transition:all .15s;text-decoration:none;display:inline-block;font-weight:700;letter-spacing:.5px}
+    .btn-ac{border-color:var(--ac-dim);color:var(--ac);background:transparent}
+    .btn-ac:hover{background:var(--ac-lite);box-shadow:0 0 8px var(--ac-dim)}
+    .btn-red{border-color:#ef444488;color:#ef4444;background:transparent}
+    .btn-red:hover{background:#ef444411}
+    main{padding:20px;max-width:700px;margin:0 auto}
+    .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px}
+    .stat-card{background:#0d000d;border:1px solid #1a0a1a;border-radius:14px;padding:22px;text-align:center;transition:transform .15s}
+    .stat-card:hover{transform:translateY(-2px)}
+    .stat-num{font-size:38px;font-weight:800}
+    .stat-num.ac{color:var(--ac);text-shadow:0 0 18px var(--ac);transition:color .1s linear,text-shadow .1s linear}
+    .stat-num.white{color:#e5e7eb}
+    .stat-label{font-size:11px;color:#4b5563;letter-spacing:2px;margin-top:6px}
+    .server-card{background:#0a0008;border:1px solid #1a0a1a;border-left:4px solid;border-radius:12px;padding:17px;margin-bottom:13px;transition:border-color .15s,transform .15s}
+    .server-card:hover{transform:translateY(-1px)}
+    .server-card.running{border-left-color:var(--ac)}
+    .server-card.stopped{border-left-color:#3f3f46}
+    .server-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .server-name{font-weight:800;font-size:15px;color:#fff;letter-spacing:.5px}
+    .status-badge{padding:3px 10px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid}
+    .status-badge.running{border-color:var(--ac);color:var(--ac);box-shadow:0 0 8px var(--ac-lite);transition:all .1s linear}
+    .status-badge.stopped{border-color:#52525b;color:#71717a}
+    .server-sub{font-size:12px;color:#4b5563;margin-bottom:14px}
+    .actions{display:flex;gap:8px;flex-wrap:wrap}
+    .action-btn{width:40px;height:36px;background:transparent;border-radius:8px;font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit;border:1px solid;text-decoration:none}
+    .action-btn:hover{transform:scale(1.08)}
+    .empty{text-align:center;padding:60px 20px;color:#374151}
+    .empty-icon{font-size:48px;margin-bottom:12px;opacity:.3}
+    .fab{position:fixed;bottom:28px;right:28px;width:58px;height:58px;border-radius:50%;background:var(--ac);color:#000;border:none;font-size:27px;font-weight:800;cursor:pointer;box-shadow:0 0 22px var(--ac-dim);display:flex;align-items:center;justify-content:center;z-index:50;transition:transform .15s,background .1s linear,box-shadow .1s linear}
+    .fab:hover{transform:scale(1.1)}
+    .modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:100}
+    .modal-bg.show{display:flex}
+    .modal{background:#0a0008;border:2px solid var(--ac);border-radius:14px;padding:28px;width:320px;box-shadow:0 0 32px var(--ac-lite);transition:border-color .1s linear,box-shadow .1s linear}
+    .modal-title{font-size:14px;font-weight:800;color:var(--ac);letter-spacing:2px;margin-bottom:20px;transition:color .1s linear}
+    .form-group{margin-bottom:14px}
+    .form-label{font-size:11px;color:#6b7280;display:block;margin-bottom:6px;letter-spacing:1px}
+    .form-input{width:100%;padding:10px 12px;background:#111;border:1px solid var(--ac-dim);border-radius:8px;color:var(--ac);font-family:inherit;font-size:13px;outline:none;transition:border-color .1s linear,color .1s linear}
+    .form-input:focus{border-color:var(--ac)}
+    select.form-input option{background:#0a0008;color:#e5e7eb}
+    .modal-actions{display:flex;gap:10px;margin-top:20px}
+    .modal-btn{flex:1;padding:11px;border-radius:8px;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer;letter-spacing:1px;border:2px solid var(--ac);background:transparent;color:var(--ac);transition:border-color .1s linear,color .1s linear}
+    .modal-cancel{border-color:#333!important;color:#6b7280!important}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span class="logo-mark">S</span>
+      <span class="logo-name">SHAPPNO VPS</span>
+    </div>
+    <div class="header-stats">
+      <span id="statCpu">CPU: --%</span>
+      <span id="statRam">RAM: --%</span>
+      <span id="statDisk">DISK: --%</span>
+    </div>
+    <div class="header-right">
+      <span class="username">@{{ username }}</span>
+      <a href="/logout" class="btn btn-red">LOG OUT</a>
+    </div>
+  </header>
 
+  <main>
+    <div class="stats">
+      <div class="stat-card"><div class="stat-num ac">{{ running }}</div><div class="stat-label">RUNNING</div></div>
+      <div class="stat-card"><div class="stat-num white">{{ total }}</div><div class="stat-label">TOTAL</div></div>
+    </div>
+
+    {% if servers %}
+      {% for name, cfg in servers.items() %}
+      <div class="server-card {{ cfg.status }}">
+        <div class="server-top">
+          <span class="server-name">{{ name.upper() }}</span>
+          <span class="status-badge {{ cfg.status }}">{{ cfg.status.upper() }}</span>
+        </div>
+        <div class="server-sub">{{ cfg.runtime }} · {{ cfg.main_file or 'main.py' }}</div>
+        <div class="actions">
+          {% if cfg.status == 'running' %}
+          <form action="/server/{{ name }}/stop" method="POST" style="display:inline">
+            <button class="action-btn" style="border-color:#ef444488;color:#ef4444" title="Stop">■</button>
+          </form>
+          {% else %}
+          <form action="/server/{{ name }}/start" method="POST" style="display:inline">
+            <button class="action-btn" style="border-color:var(--ac-dim);color:var(--ac)" title="Start">▶</button>
+          </form>
+          {% endif %}
+          <a href="/server/{{ name }}" class="action-btn" style="border-color:#38bdf888;color:#38bdf8" title="View">👀</a>
+          <a href="/server/{{ name }}?tab=settings" class="action-btn" style="border-color:#c084fc88;color:#c084fc" title="Settings">⚙️</a>
+          <form action="/server/delete/{{ name }}" method="POST" style="display:inline" onsubmit="return confirm('Delete {{ name }}?')">
+            <button class="action-btn" style="border-color:#ef444488;color:#ef4444" title="Delete">🗑</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty">
+        <div class="empty-icon">📂</div>
+        <div>NO PROJECTS YET...!! CLICK + TO CREATE ONE...!!</div>
+      </div>
+    {% endif %}
+  </main>
+
+  <button class="fab" onclick="document.getElementById('createModal').classList.add('show')">+</button>
+
+  <div id="createModal" class="modal-bg" onclick="if(event.target===this)this.classList.remove('show')">
+    <div class="modal">
+      <div class="modal-title">NEW PROJECT</div>
+      <form action="/server/create" method="POST">
+        <div class="form-group">
+          <label class="form-label">PROJECT NAME</label>
+          <input class="form-input" name="name" placeholder="my-bot" required autofocus>
+        </div>
+        <div class="form-group">
+          <label class="form-label">RUNTIME</label>
+          <select class="form-input" name="runtime">
+            <option value="python">Python</option>
+            <option value="node">Node.js</option>
+            <option value="static">Static</option>
+          </select>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="modal-btn">CREATE</button>
+          <button type="button" class="modal-btn modal-cancel" onclick="document.getElementById('createModal').classList.remove('show')">CANCEL</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+    async function fetchStats(){
+      try{
+        const r=await fetch('/api/stats');
+        const d=await r.json();
+        document.getElementById('statCpu').textContent='CPU: '+d.cpu.toFixed(1)+'%';
+        document.getElementById('statRam').textContent='RAM: '+d.ram.toFixed(1)+'%';
+        document.getElementById('statDisk').textContent='DISK: '+d.disk.toFixed(1)+'%';
+      }catch(e){}
+    }
+    fetchStats();
+    setInterval(fetchStats,5000);
+
+    // ─── Global color cycle: every 0.10s everywhere (login + dashboard) ──────
+    let hue=0;
+    function applyColor(){
+      hue=(hue+6)%360;
+      const ac=`hsl(${hue},90%,58%)`;
+      const dim=`hsla(${hue},90%,58%,0.55)`;
+      const lite=`hsla(${hue},90%,58%,0.10)`;
+      const root=document.documentElement.style;
+      root.setProperty('--ac',ac);
+      root.setProperty('--ac-dim',dim);
+      root.setProperty('--ac-lite',lite);
+    }
+    setInterval(applyColor,100);
+    applyColor();
+  </script>
+</body>
+</html>
